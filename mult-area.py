@@ -59,7 +59,7 @@ def FSM(crossbar: Crossbar, N: int):
             # Compute partial products
             # --- 1 OP --- #
             crossbar.perform(Operation([
-                Gate(GateType.MAGIC_NOR, [(j, ABIT), (j, TEMP1)], [(j, ABBIT)]) if is_notted[j] else
+                Gate(GateType.FELIX_MIN3, [(j, ABIT), (j, TEMP1), (j, TEMP2)], [(j, ABBIT)]) if is_notted[j] else
                 Gate(GateType.MAGIC_NOT, [(j, ABIT)], [(j, ABBIT)])
                 for j in range(2, N + 1)
             ] + [Gate(GateType.MAGIC_NOT, [(0, N + k)], [(1, ABBIT)])]))
