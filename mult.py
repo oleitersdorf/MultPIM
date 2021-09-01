@@ -14,28 +14,28 @@ def FSM(crossbar: Crossbar, N: int):
     """
 
     # Legend
-    ABIT = 0
-    BBIT = 1
-    ABBIT = 2  # only in partitions that receive b'
-    SBITEven = 3  # stores S for even iterations
-    CBITEven = 4  # stores C for even iterations
-    NotCBITEven = 5  # stores not(C) for even iterations
-    SBITOdd = 6  # stores S for odd iterations
-    CBITOdd = 7  # stores C for odd iterations
-    NotCBITOdd = 8  # stores not(C) for odd iterations
-    TEMP = 9
+    TEMP = 0
+    ABIT = 1
+    BBIT = 2
+    ABBIT = 3  # only in partitions that receive b'
+    SBITEven = 4  # stores S for even iterations
+    CBITEven = 5  # stores C for even iterations
+    NotCBITEven = 6  # stores not(C) for even iterations
+    SBITOdd = 7  # stores S for odd iterations
+    CBITOdd = 8  # stores C for odd iterations
+    NotCBITOdd = 9  # stores not(C) for odd iterations
 
     # Init all entries in partitions 1 to N+1
     # --- 2 OPs --- #
     crossbar.perform(
-        Operation([Gate(GateType.INIT1, [],
+        Operation([Gate(GateType.INIT1, [], [(1, TEMP), (1, ABIT), (1, BBIT)])] + [Gate(GateType.INIT1, [],
                   [(partition, ABIT), (partition, BBIT), (partition, ABBIT), (partition, NotCBITEven),
-                   (partition, SBITOdd), (partition, CBITOdd), (partition, NotCBITOdd), (partition, TEMP), (partition, TEMP)])
-                for partition in range(1, N+1)] + [Gate(GateType.INIT1, [], [(N + 1, i) for i in range(2*N)])]))
+                   (partition, SBITOdd), (partition, CBITOdd), (partition, NotCBITOdd), (partition, TEMP)])
+                for partition in range(2, N+1)] + [Gate(GateType.INIT1, [], [(N + 1, i) for i in range(2*N)])]))
     crossbar.perform(
         Operation([Gate(GateType.INIT0, [],
                   [(partition, SBITEven), (partition, CBITEven)])
-                for partition in range(1, N+1)]))
+                for partition in range(2, N+1)]))
 
     # Store a's bits in the partitions
     # --- N OPs --- #
@@ -56,9 +56,6 @@ def FSM(crossbar: Crossbar, N: int):
 
         if k < N:
 
-            # Used to understand which partitions receive b_k and which receive not(b_k)
-            numStepsToReach = [0] * (N + 1)
-
             # Copy b_k to all partitions using log_2(N) ops
             # --- log_2(N) OPs --- #
             log2_N = N.bit_length() - 1
@@ -67,9 +64,7 @@ def FSM(crossbar: Crossbar, N: int):
                     Gate(GateType.MAGIC_NOT, [(j, BBIT) if j != 1 else (0, N+k)], [(j + (N >> (i+1)), BBIT)])
                     for j in range(1, N+1, 1 << (log2_N - i))
                 ]))
-                for j in range(1, N + 1, 1 << (log2_N - i)):
-                    numStepsToReach[j + (N >> (i+1))] = numStepsToReach[j] + 1
-            is_notted = [bool(steps % 2) for steps in numStepsToReach]
+            is_notted[1:] = [bool(bin(p).count('1') % 2 == 1) for p in range(N)]
 
             # Compute partial products
             # --- 1 OP --- #
@@ -112,12 +107,13 @@ def FSM(crossbar: Crossbar, N: int):
 
         # Init the temps for next time
         # --- 1 OP --- #
-        crossbar.perform(Operation([
+        crossbar.perform(Operation([Gate(GateType.INIT1, [], [(1, BBIT)])] + [
             Gate(GateType.INIT1, [], ([(j, BBIT)] if k < N else []) + [(j, ABBIT), (j, iterSBIT), (j, iterCBIT), (j, iterNotCBIT), (j, TEMP)])
-            for j in range(1, N + 1)
+            for j in range(2, N + 1)
         ]))
 
         if k == N-1:
+            # Set AB to zero for last k iterations
             # --- 1 OP --- #
             crossbar.perform(Operation([
                 Gate(GateType.INIT0, [], [(j, BBIT)])
@@ -126,11 +122,11 @@ def FSM(crossbar: Crossbar, N: int):
 
 
 # Parameters
-N = 32
+N = 16
 
 # Crossbar
 partitionSize = 10
-crossbar = Crossbar([2 * N] + [partitionSize] * N + [2 * N])
+crossbar = Crossbar([2 * N] + [3] + [partitionSize] * (N - 1) + [2 * N])
 
 num_samples = 10
 for sample in tqdm(range(num_samples)):
