@@ -4,9 +4,9 @@ from tqdm import tqdm
 from random import randint
 
 
-def FSM(crossbar: Crossbar, N: int):
+def MultPIM(crossbar: Crossbar, N: int):
     """
-    Performs the FSM algorithm on the given crossbar
+    Performs the MultPIM algorithm on the given crossbar
     :param crossbar: The crossbar to perform the algorithm on. Assumes partition 0 contains only the two inputs,
     that there are N partitions (indices 1 to N) with unknown init status, and a partition at the end for the output.
     :param N: The number of bits in each number. Assumes w.l.o.g. N is a power of two: this is not a necessary
@@ -42,7 +42,7 @@ def FSM(crossbar: Crossbar, N: int):
     for i in range(N):
         crossbar.perform(Operation([Gate(GateType.MAGIC_NOT, [(0, i)], [(N-i, ABIT)])]))
 
-    # Iterate over first N stages
+    # Iterate over all 2*N stages
     for k in range(2 * N):
 
         # The bit locations relevant to this iteration
@@ -140,7 +140,7 @@ for sample in tqdm(range(num_samples)):
     crossbar.partitions[0] = [bool((a & (1 << i)) >> i) for i in range(N)] + [bool((b & (1 << i)) >> i) for i in range(N)]
 
     # Perform multiplication
-    FSM(crossbar, N)
+    MultPIM(crossbar, N)
 
     # Verify results
     assert(sum([int(crossbar.partitions[N+1][i]) << i for i in range(2*N)]) == a * b)
