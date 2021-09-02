@@ -15,13 +15,13 @@ def MultPIMArea(crossbar: Crossbar, N: int):
 
     # Legend
     ABIT = 0
-    ABBIT = 1  # only in partitions that receive b'
+    ABBIT = 1
     SBIT = 2  # stores S
     CBIT = 3  # stores C
     TEMP1 = 4
     TEMP2 = 5
 
-    # Init all entries in partitions 1 to N+1
+    # Init entries
     # --- 2 OPs --- #
     crossbar.perform(
         Operation([Gate(GateType.INIT1, [],

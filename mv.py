@@ -66,13 +66,9 @@ def MV(crossbar: Crossbar, N: int, n: int):
             nextCBIT = CBITEven if k % 2 == 1 else CBITOdd
             nextNotCBIT = NotCBITEven if k % 2 == 1 else NotCBITOdd
 
-            # Used to understand which partitions receive b_k and which receive not(b_k)
-            numStepsToReach = [0] * (N + 1)
-
             # Copy b_k to p_1
             # --- 1 OP --- #
             crossbar.perform(Operation([Gate(GateType.MAGIC_NOT, [(0, n*N + element*N + k)], [(1, BBIT)])]))
-            numStepsToReach[1] = 1
 
             # Copy b_k to all partitions using log_2(N) ops
             # --- log_2(N) OPs --- #
@@ -82,9 +78,7 @@ def MV(crossbar: Crossbar, N: int, n: int):
                     Gate(GateType.MAGIC_NOT, [(j, BBIT)], [(j + (N >> (i + 1)), BBIT)])
                     for j in range(1, N + 1, 1 << (log2_N - i))
                 ]))
-                for j in range(1, N + 1, 1 << (log2_N - i)):
-                    numStepsToReach[j + (N >> (i + 1))] = numStepsToReach[j] + 1
-            is_notted = [bool(steps % 2) for steps in numStepsToReach]
+            is_notted = [False] + [bool(bin(p).count('1') % 2 == 0) for p in range(N)]
 
             # Compute partial products
             # --- 1 OP --- #
