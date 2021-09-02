@@ -89,7 +89,7 @@ def MV(crossbar: Crossbar, N: int, n: int):
             # Compute partial products
             # --- 1 OP --- #
             crossbar.perform(Operation([
-                Gate(GateType.MAGIC_NOR, [(j, ABIT), (j, BBIT)], [(j, ABBIT)]) if is_notted[j] else
+                Gate(GateType.FELIX_MIN3, [(j, ABIT), (j, BBIT), (j, TEMP)], [(j, ABBIT)]) if is_notted[j] else
                 Gate(GateType.MAGIC_NOT, [(j, ABIT)], [(j, BBIT)])
                 for j in range(1, N + 1)
             ] + [Gate(GateType.FELIX_MIN3, [(0, 2*n*N + N-k-1), (0, 2*n*N + N + N-k-1), (0, 2*n*N + 2*N + iterCBIT)], [(0, 2*n*N + 2*N + nextNotCBIT)])]))
