@@ -25,6 +25,15 @@ The general expressions for N-bit fixed-point multiplication are below. Asymptot
 | MultPIM (This work) | Nlog(N) + 14N + 3  | 14N - 7 | N - 1 | NOT/Min3 |
 | MultPIM-Area (This work) | Nlog(N) + 23N + 3 | 10N | N - 1 | NOT/Min3 |
 
+We also include alternative implementations that assume different gate types (see folders). Their results for 32-bit multiplication:
+
+| Gates | Latency (Cycles) | Area (Memristors) |
+| :---- | :----: | :----: |
+| NOT/Min3 | 611 | 441 |
+| NOT/Min3-Area | 899 | 320 |
+| NOT/NOR | TODO | TODO |
+| NOT/NOR-Area | TODO | TODO |
+
 ## User Information
 ### Dependencies
 In order to use the project, you will need:
