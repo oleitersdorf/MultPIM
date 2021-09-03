@@ -65,95 +65,148 @@ def MultPIM(crossbar: Crossbar, N: int):
                 for j in range(2, N + 1)
             ] + [Gate(GateType.MAGIC_NOT, [(0, N + k)], [(1, BBIT)])]))
 
-        # TEMP1 = NOR(ABBIT if is_notted[j] else BBIT, SBIT) = NOR(A, B)
-        # TEMP2 = NOR(ABBIT if is_notted[j] else BBIT, TEMP1) = NOR(A, NOR(A, B))
-        # TEMP3 = NOR(TEMP1, SBIT) = NOR(NOR(A, B), B)
-        # INIT(ABBIT, SBIT)
+            # TEMP1 = NOR(ABBIT if is_notted[j] else BBIT, SBIT) = NOR(A, B)
+            # TEMP2 = NOR(ABBIT if is_notted[j] else BBIT, TEMP1) = NOR(A, NOR(A, B))
+            # TEMP3 = NOR(TEMP1, SBIT) = NOR(NOR(A, B), B)
+            # INIT(ABBIT, SBIT)
 
-        # --- 1 OP --- #
-        crossbar.perform(Operation([
-            Gate(GateType.MAGIC_NOR, [(j, ABBIT if is_notted[j] else BBIT), (j, SBIT)], [(j, TEMP1)])
-            for j in range(2, N + 1)
-        ]))
-        # --- 1 OP --- #
-        crossbar.perform(Operation([
-            Gate(GateType.MAGIC_NOR, [(j, ABBIT if is_notted[j] else BBIT), (j, TEMP1)], [(j, TEMP2)])
-            for j in range(2, N + 1)
-        ]))
-        # --- 1 OP --- #
-        crossbar.perform(Operation([
-            Gate(GateType.MAGIC_NOR, [(j, TEMP1), (j, SBIT)], [(j, TEMP3)])
-            for j in range(2, N + 1)
-        ]))
-        # --- 1 OP --- #
-        crossbar.perform(Operation([
-            Gate(GateType.INIT1, [], [(j, ABBIT), (j, SBIT)])
-            for j in range(2, N + 1)
-        ]))
+            # --- 1 OP --- #
+            crossbar.perform(Operation([
+                Gate(GateType.MAGIC_NOR, [(j, ABBIT if is_notted[j] else BBIT), (j, SBIT)], [(j, TEMP1)])
+                for j in range(2, N + 1)
+            ]))
+            # --- 1 OP --- #
+            crossbar.perform(Operation([
+                Gate(GateType.MAGIC_NOR, [(j, ABBIT if is_notted[j] else BBIT), (j, TEMP1)], [(j, TEMP2)])
+                for j in range(2, N + 1)
+            ]))
+            # --- 1 OP --- #
+            crossbar.perform(Operation([
+                Gate(GateType.MAGIC_NOR, [(j, TEMP1), (j, SBIT)], [(j, TEMP3)])
+                for j in range(2, N + 1)
+            ]))
+            # --- 1 OP --- #
+            crossbar.perform(Operation([
+                Gate(GateType.INIT1, [], [(j, ABBIT), (j, SBIT)])
+                for j in range(2, N + 1)
+            ]))
 
-        # ABBIT = NOR(TEMP2, TEMP3)
-        # SBIT = NOR(ABBIT, CBIT)
-        # INIT(TEMP2, TEMP3)
+            # ABBIT = NOR(TEMP2, TEMP3)
+            # SBIT = NOR(ABBIT, CBIT)
+            # INIT(TEMP2, TEMP3)
 
-        # --- 1 OP --- #
-        crossbar.perform(Operation([
-            Gate(GateType.MAGIC_NOR, [(j, TEMP2), (j, TEMP3)], [(j, ABBIT)])
-            for j in range(2, N + 1)
-        ]))
-        # --- 1 OP --- #
-        crossbar.perform(Operation([
-            Gate(GateType.MAGIC_NOR, [(j, ABBIT), (j, CBIT)], [(j, SBIT)])
-            for j in range(2, N + 1)
-        ]))
-        # --- 1 OP --- #
-        crossbar.perform(Operation([
-            Gate(GateType.INIT1, [], [(j, TEMP2), (j, TEMP3)])
-            for j in range(2, N + 1)
-        ]))
+            # --- 1 OP --- #
+            crossbar.perform(Operation([
+                Gate(GateType.MAGIC_NOR, [(j, TEMP2), (j, TEMP3)], [(j, ABBIT)])
+                for j in range(2, N + 1)
+            ]))
+            # --- 1 OP --- #
+            crossbar.perform(Operation([
+                Gate(GateType.MAGIC_NOR, [(j, ABBIT), (j, CBIT)], [(j, SBIT)])
+                for j in range(2, N + 1)
+            ]))
+            # --- 1 OP --- #
+            crossbar.perform(Operation([
+                Gate(GateType.INIT1, [], [(j, TEMP2), (j, TEMP3)])
+                for j in range(2, N + 1)
+            ]))
 
-        # TEMP2 = NOR(ABBIT, SBIT)
-        # TEMP3 = NOR(SBIT, CBIT)
-        # INIT(CBIT)
+            # TEMP2 = NOR(ABBIT, SBIT)
+            # TEMP3 = NOR(SBIT, CBIT)
+            # INIT(CBIT)
 
-        # --- 1 OP --- #
-        crossbar.perform(Operation([
-            Gate(GateType.MAGIC_NOR, [(j, ABBIT), (j, SBIT)], [(j, TEMP2)])
-            for j in range(2, N + 1)
-        ]))
-        # --- 1 OP --- #
-        crossbar.perform(Operation([
-            Gate(GateType.MAGIC_NOR, [(j, SBIT), (j, CBIT)], [(j, TEMP3)])
-            for j in range(2, N + 1)
-        ]))
-        # --- 1 OP --- #
-        crossbar.perform(Operation([
-            Gate(GateType.INIT1, [], [(j, CBIT)])
-            for j in range(2, N + 1)
-        ]))
-        # --- 1 OP --- #
-        crossbar.perform(Operation([
-            Gate(GateType.MAGIC_NOR, [(j, TEMP1), (j, SBIT)], [(j, CBIT)])
-            for j in range(2, N + 1)
-        ]))
+            # --- 1 OP --- #
+            crossbar.perform(Operation([
+                Gate(GateType.MAGIC_NOR, [(j, ABBIT), (j, SBIT)], [(j, TEMP2)])
+                for j in range(2, N + 1)
+            ]))
+            # --- 1 OP --- #
+            crossbar.perform(Operation([
+                Gate(GateType.MAGIC_NOR, [(j, SBIT), (j, CBIT)], [(j, TEMP3)])
+                for j in range(2, N + 1)
+            ]))
+            # --- 1 OP --- #
+            crossbar.perform(Operation([
+                Gate(GateType.INIT1, [], [(j, CBIT)])
+                for j in range(2, N + 1)
+            ]))
+            # --- 1 OP --- #
+            crossbar.perform(Operation([
+                Gate(GateType.MAGIC_NOR, [(j, TEMP1), (j, SBIT)], [(j, CBIT)])
+                for j in range(2, N + 1)
+            ]))
 
-        # INIT(SBIT)
-        # SBIT = NOR(TEMP2, TEMP3)
+            # INIT(SBIT)
+            # SBIT = NOR(TEMP2, TEMP3)
 
-        # --- 1 OP --- #
-        crossbar.perform(Operation([
-            Gate(GateType.INIT1, [], [(j, SBIT)])
-            for j in range(2, N + 1)
-        ]))
-        # Compute S across adjacent partitions
-        # --- 2 OPs --- #
-        crossbar.perform(Operation([
-            Gate(GateType.MAGIC_NOR, [(j, TEMP2), (j, TEMP3)], [(j + 1, SBIT)])
-            for j in range(3, N + 1, 2)
-        ] + [Gate(GateType.MAGIC_NOR, [(1, ABIT), (1, BBIT)], [(2, SBIT)]) if k < N else Gate(GateType.INIT0, [], [(2, SBIT)])]))
-        crossbar.perform(Operation([
-            Gate(GateType.MAGIC_NOR, [(j, TEMP2), (j, TEMP3)], [(j + 1, SBIT)])
-            for j in range(2, N, 2)
-        ] + [Gate(GateType.MAGIC_NOR, [(N, TEMP2), (N, TEMP3)], [(N + 1, k)])]))
+            # --- 1 OP --- #
+            crossbar.perform(Operation([
+                Gate(GateType.INIT1, [], [(j, SBIT)])
+                for j in range(2, N + 1)
+            ]))
+            # Compute S across adjacent partitions
+            # --- 2 OPs --- #
+            crossbar.perform(Operation([
+                Gate(GateType.MAGIC_NOR, [(j, TEMP2), (j, TEMP3)], [(j + 1, SBIT)])
+                for j in range(3, N + 1, 2)
+            ] + [Gate(GateType.MAGIC_NOR, [(1, ABIT), (1, BBIT)], [(2, SBIT)]) if k < N else Gate(GateType.INIT0, [], [(2, SBIT)])]))
+            crossbar.perform(Operation([
+                Gate(GateType.MAGIC_NOR, [(j, TEMP2), (j, TEMP3)], [(j + 1, SBIT)])
+                for j in range(2, N, 2)
+            ] + [Gate(GateType.MAGIC_NOR, [(N, TEMP2), (N, TEMP3)], [(N + 1, k)])]))
+
+        else:
+
+            # TEMP1 = NOR(SBIT, CBIT)
+            # TEMP2 = NOT(SBIT)
+            # TEMP3 = NOT(CBIT)
+            # INIT(CBIT)
+
+            # --- 1 OP --- #
+            crossbar.perform(Operation([
+                Gate(GateType.MAGIC_NOR, [(j, SBIT), (j, CBIT)], [(j, TEMP1)])
+                for j in range(2, N + 1)
+            ]))
+            # --- 1 OP --- #
+            crossbar.perform(Operation([
+                Gate(GateType.MAGIC_NOT, [(j, SBIT)], [(j, TEMP2)])
+                for j in range(2, N + 1)
+            ]))
+            # --- 1 OP --- #
+            crossbar.perform(Operation([
+                Gate(GateType.MAGIC_NOT, [(j, CBIT)], [(j, TEMP3)])
+                for j in range(2, N + 1)
+            ]))
+            # --- 1 OP --- #
+            crossbar.perform(Operation([
+                Gate(GateType.INIT1, [], [(j, CBIT)])
+                for j in range(2, N + 1)
+            ]))
+
+            # CBIT = NOR(TEMP2, TEMP3)
+            # INIT(SBIT)
+            # SUM = NOR(CBIT, TEMP1)
+
+            # --- 1 OP --- #
+            crossbar.perform(Operation([
+                Gate(GateType.MAGIC_NOR, [(j, TEMP2), (j, TEMP3)], [(j, CBIT)])
+                for j in range(2, N + 1)
+            ]))
+            # --- 1 OP --- #
+            crossbar.perform(Operation([
+                Gate(GateType.INIT1, [], [(j, SBIT)])
+                for j in range(2, N + 1)
+            ]))
+            # Compute S across adjacent partitions
+            # --- 2 OPs --- #
+            crossbar.perform(Operation([
+                Gate(GateType.MAGIC_NOR, [(j, CBIT), (j, TEMP1)], [(j + 1, SBIT)])
+                for j in range(3, N + 1, 2)
+            ] + [Gate(GateType.MAGIC_NOR, [(1, ABIT), (1, BBIT)], [(2, SBIT)]) if k < N else Gate(GateType.INIT0, [], [(2, SBIT)])]))
+            crossbar.perform(Operation([
+                Gate(GateType.MAGIC_NOR, [(j, CBIT), (j, TEMP1)], [(j + 1, SBIT)])
+                for j in range(2, N, 2)
+            ] + [Gate(GateType.MAGIC_NOR, [(N, CBIT), (N, TEMP1)], [(N + 1, k)])]))
 
         # Init the temps for next time
         # --- 1 OP --- #
