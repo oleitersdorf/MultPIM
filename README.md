@@ -33,7 +33,8 @@ We also include alternative implementations that assume different gate types (se
 | NOT/Min3-Area | 899 | 320 |
 | NOT/Maj3 | 643 | 442 |
 | NOT/Maj3-Area | 995 | 352 |
-| NOT/NOR | 1187 | 379 |
+| NOT/NOR | 995 | 379 |
+| NOT/NAND | 1027 | 382 |
 
 ## User Information
 ### Dependencies
