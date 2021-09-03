@@ -28,7 +28,7 @@ def MultPIM(crossbar: Crossbar, N: int):
     # Init all entries in partitions 1 to N+1
     # --- 2 OPs --- #
     crossbar.perform(
-        Operation([Gate(GateType.INIT1, [], [(1, TEMP), (1, ABIT), (1, BBIT)])] + [Gate(GateType.INIT1, [],
+        Operation([Gate(GateType.INIT1, [], [(1, TEMP), (1, ABIT), (1, BBIT), (1, 3)])] + [Gate(GateType.INIT1, [],
                   [(partition, ABIT), (partition, BBIT), (partition, ABBIT), (partition, NotCBITEven),
                    (partition, SBITOdd), (partition, CBITOdd), (partition, NotCBITOdd), (partition, TEMP)])
                 for partition in range(2, N+1)] + [Gate(GateType.INIT1, [], [(N + 1, i) for i in range(2*N)])]))
@@ -69,45 +69,51 @@ def MultPIM(crossbar: Crossbar, N: int):
             # Compute partial products
             # --- 1 OP --- #
             crossbar.perform(Operation([
-                Gate(GateType.FELIX_MIN3, [(j, ABIT), (j, BBIT), (j, TEMP)], [(j, ABBIT)]) if is_notted[j] else
+                Gate(GateType.MAGIC_NOT, [(j, BBIT)], [(j, ABBIT)]) if is_notted[j] else
                 Gate(GateType.MAGIC_NOT, [(j, ABIT)], [(j, BBIT)])
                 for j in range(2, N + 1)
             ] + [Gate(GateType.MAGIC_NOT, [(0, N + k)], [(1, BBIT)])]))
+            # --- 1 OP --- #
+            crossbar.perform(Operation([
+                Gate(GateType.MAGIC_NOT, [(j, ABIT)], [(j, ABBIT)])
+                for j in range(2, N + 1) if is_notted[j]
+            ]))
 
-        # Compute new not(carry)
-        # --- 1 OP --- #
-        crossbar.perform(Operation([
-            Gate(GateType.FELIX_MIN3, [(j, ABBIT if is_notted[j] else BBIT), (j, iterSBIT), (j, iterCBIT)], [(j, nextNotCBIT)])
-            for j in range(2, N + 1)
-        ]))
         # Compute new carry
         # --- 1 OP --- #
         crossbar.perform(Operation([
-            Gate(GateType.MAGIC_NOT, [(j, nextNotCBIT)], [(j, nextCBIT)])
+            Gate(GateType.MAJ3, [(j, ABBIT if is_notted[j] else BBIT), (j, iterSBIT), (j, iterCBIT)], [(j, nextCBIT)])
+            for j in range(2, N + 1)
+        ]))
+        # Compute new not(carry)
+        # --- 1 OP --- #
+        crossbar.perform(Operation([
+            Gate(GateType.MAGIC_NOT, [(j, nextCBIT)], [(j, nextNotCBIT)])
             for j in range(2, N + 1)
         ]))
 
-        # Compute Min3(AB, S, not(C))
+        # Compute not(Min3(AB, S, not(C)))
         # --- 1 OP --- #
+        # crossbar.partitions[1][TEMP] = True
         crossbar.perform(Operation([
-            Gate(GateType.FELIX_MIN3, [(j, ABBIT if is_notted[j] else BBIT), (j, iterSBIT), (j, iterNotCBIT)], [(j, TEMP)])
+            Gate(GateType.MAJ3, [(j, ABBIT if is_notted[j] else BBIT), (j, iterSBIT), (j, iterNotCBIT)], [(j, TEMP)])
             for j in range(2, N + 1)
-        ]))
+        ] + ([Gate(GateType.MAJ3, [(1, ABIT), (1, BBIT), (1, TEMP)], [(1, 3)])] if k < N else [])))
 
         # Compute S across adjacent partitions
         # --- 2 OPs --- #
         crossbar.perform(Operation([
-            Gate(GateType.FELIX_MIN3, [(j, nextCBIT), (j, iterNotCBIT), (j, TEMP)], [(j + 1, nextSBIT)])
+            Gate(GateType.MAJ3, [(j, nextNotCBIT), (j, iterCBIT), (j, TEMP)], [(j + 1, nextSBIT)])
             for j in range(3, N + 1, 2)
-        ] + [Gate(GateType.FELIX_MIN3, [(1, ABIT), (1, BBIT), (1, TEMP)], [(2, nextSBIT)]) if k < N else Gate(GateType.INIT0, [], [(2, nextSBIT)])]))
+        ] + [Gate(GateType.MAGIC_NOT, [(1, 3)], [(2, nextSBIT)]) if k < N else Gate(GateType.INIT0, [], [(2, nextSBIT)])]))
         crossbar.perform(Operation([
-            Gate(GateType.FELIX_MIN3, [(j, nextCBIT), (j, iterNotCBIT), (j, TEMP)], [(j + 1, nextSBIT)])
+            Gate(GateType.MAJ3, [(j, nextNotCBIT), (j, iterCBIT), (j, TEMP)], [(j + 1, nextSBIT)])
             for j in range(2, N, 2)
-        ] + [Gate(GateType.FELIX_MIN3, [(N, nextCBIT), (N, iterNotCBIT), (N, TEMP)], [(N + 1, k)])]))
+        ] + [Gate(GateType.MAJ3, [(N, nextNotCBIT), (N, iterCBIT), (N, TEMP)], [(N + 1, k)])]))
 
         # Init the temps for next time
         # --- 1 OP --- #
-        crossbar.perform(Operation([Gate(GateType.INIT1, [], [(1, BBIT)])] + [
+        crossbar.perform(Operation([Gate(GateType.INIT1, [], [(1, BBIT), (1, 3)])] + [
             Gate(GateType.INIT1, [], ([(j, BBIT)] if k < N else []) + [(j, ABBIT), (j, iterSBIT), (j, iterCBIT), (j, iterNotCBIT), (j, TEMP)])
             for j in range(2, N + 1)
         ]))
@@ -126,7 +132,7 @@ N = 32
 
 # Crossbar
 partitionSize = 10
-crossbar = Crossbar([2 * N] + [3] + [partitionSize] * (N - 1) + [2 * N])
+crossbar = Crossbar([2 * N] + [4] + [partitionSize] * (N - 1) + [2 * N])
 
 num_samples = 10
 for sample in tqdm(range(num_samples)):

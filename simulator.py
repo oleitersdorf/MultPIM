@@ -12,8 +12,9 @@ class GateType(Enum):
     FELIX_NAND = 2
     FELIX_OR = 3
     FELIX_MIN3 = 4
-    INIT0 = 5
-    INIT1 = 6
+    MAJ3 = 5
+    INIT0 = 6
+    INIT1 = 7
 
 
 class Gate:
@@ -54,6 +55,12 @@ class Gate:
         elif self.type == GateType.FELIX_MIN3:
             partitions[self.outputs[0][0]][self.outputs[0][1]] = \
                 not ((partitions[self.inputs[0][0]][self.inputs[0][1]] and partitions[self.inputs[1][0]][self.inputs[1][1]]) or
+                 (partitions[self.inputs[0][0]][self.inputs[0][1]] and partitions[self.inputs[2][0]][self.inputs[2][1]]) or
+                 (partitions[self.inputs[1][0]][self.inputs[1][1]] and partitions[self.inputs[2][0]][self.inputs[2][1]])) and \
+                partitions[self.outputs[0][0]][self.outputs[0][1]]
+        elif self.type == GateType.MAJ3:
+            partitions[self.outputs[0][0]][self.outputs[0][1]] = \
+                ((partitions[self.inputs[0][0]][self.inputs[0][1]] and partitions[self.inputs[1][0]][self.inputs[1][1]]) or
                  (partitions[self.inputs[0][0]][self.inputs[0][1]] and partitions[self.inputs[2][0]][self.inputs[2][1]]) or
                  (partitions[self.inputs[1][0]][self.inputs[1][1]] and partitions[self.inputs[2][0]][self.inputs[2][1]])) and \
                 partitions[self.outputs[0][0]][self.outputs[0][1]]
