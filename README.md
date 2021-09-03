@@ -1,6 +1,6 @@
 # MultPIM: Fast Stateful Multiplication for Processing-in-Memory
 ## Overview
-This is a logic simulator to verify the theoretical results (latency & area) of MultPIM. This logic simulator models a memristive crossbar row with partitions, and then simulates running the MultPIM algorithm on 
+This is a logic simulator to verify the theoretical results (latency & area) of [MultPIM](https://arxiv.org/abs/2108.13378). This logic simulator models a memristive crossbar row with partitions, and then simulates running the MultPIM algorithm on 
 the row. Crucially, the simulator models all stateful operations exactly, including initialization cycles.
 
 ## Results
